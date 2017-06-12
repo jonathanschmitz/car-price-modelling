@@ -106,7 +106,7 @@ def learning_curve(train_x, train_y, cv_x, cv_y, lamb=0):
     for n in range(1, len(train_x) + 1):
         theta = train(train_x[:n], train_y[:n], lamb)
         train_error = cost(train_x[:n], train_y[:n], theta)
-        import pdb; pdb.set_trace()
+        # import pdb; pdb.set_trace()
         train_errors.append(train_error)
         cv_error = cost(cv_x, cv_y, theta)
         cv_errors.append(cv_error)
@@ -181,12 +181,19 @@ def test_cost_grad():
     x = np.vstack([X, Xval, Xtest])[:,1]
     y = np.vstack([d["y"], d["yval"], d["ytest"]]).ravel()
 
-    # test cost function
+    # # test cost function
     # assert (cost(X, d["y"].ravel(), np.array([1, 1]), 1) - 303.993192) < (10 ** -5)
     # assert np.sum(calc_grad(X, d["y"], np.array([1, 1]), 1) - np.array([-15.303016, 598.250744])) < 0.00001
-    error_train, error_val = learning_curve(X, d["y"], Xval, d["yval"])
-    print(error_train)
-    print(error_val)
+    # # first without regularization
+    # error_train, error_val = learning_curve(X, d["y"], Xval, d["yval"])
+    # assert np.sum(error_train[-3:] - np.array([23.261462, 24.317250, 22.373906])) < 0.00001
+    # assert np.sum(error_val[-3:] - np.array([28.936207, 29.551432, 29.433818])) < 0.0001
+    # # now with regularization
+    # error_train, error_val = learning_curve(X, d["y"], Xval, d["yval"], 1)
+    # assert np.sum(error_train[-3:] - np.array([23.261462, 24.317250, 22.373907])) < 0.00001
+    # assert np.sum(error_val[-3:] - np.array([28.935174, 29.551049, 29.433177])) < 0.0001
+    # now: with polynomial features:
+    
 
 # test stuff here
 test_cost_grad()
