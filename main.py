@@ -79,11 +79,13 @@ def gradient_descent(x, y, lamb):
 def train_parameters(train_x, train_y, cv_x, cv_y):
     # choose lambda
     lambdas = [0, 0.001, 0.003, 0.01, 0.03, 0.1, 0.3, 1, 3, 10, 100, 1000, 10000]
+    thetas = []
     train_errors, cv_errors = [], []
     # train = normal_equation if train_x.shape[1] < 1000 else gradient_descent
     train = gradient_descent
     for lamb in lambdas:
         theta = train(train_x, train_y, lamb)
+        thetas.append(theta)
         train_error = cost(train_x, train_y, theta)
         train_errors.append(train_error)
         cv_error = cost(cv_x, cv_y, theta)
@@ -93,6 +95,7 @@ def train_parameters(train_x, train_y, cv_x, cv_y):
     plt.plot(cv_errors)
     plt.legend(("train", "cv"))
     plt.xticks(range(len(lambdas)), [str(x) for x in lambdas])
+    return thetas[np.argmin(cv_errors)]
 
 
 def learning_curve(train_x, train_y, cv_x, cv_y, lamb=0):
@@ -100,20 +103,20 @@ def learning_curve(train_x, train_y, cv_x, cv_y, lamb=0):
     train_errors, cv_errors = [], []
     #train = normal_equation if train_x.shape[1] < 1000 else gradient_descent
     train = gradient_descent
-    # for n in range(1 if len(train_x) < 20 else len(train_x)// 20,
-    #                len(train_x),
-    #                len(train_x)//20 if len(train_x) > 20 else 1):
-    for n in range(1, len(train_x) + 1):
+    for n in range(1 if len(train_x) < 20 else len(train_x)// 20,
+                   len(train_x),
+                   len(train_x)//20 if len(train_x) > 20 else 1):
+    # for n in range(1, len(train_x) + 1):
         theta = train(train_x[:n], train_y[:n], lamb)
         train_error = cost(train_x[:n], train_y[:n], theta)
         # import pdb; pdb.set_trace()
         train_errors.append(train_error)
         cv_error = cost(cv_x, cv_y, theta)
         cv_errors.append(cv_error)
-    # plt.figure()
-    # plt.plot(train_errors)
-    # plt.plot(cv_errors)
-    # plt.legend(("train", "cv"))
+    plt.figure()
+    plt.plot(train_errors)
+    plt.plot(cv_errors)
+    plt.legend(("train", "cv"))
     #plt.show()
     return train_errors, cv_errors
 
@@ -129,9 +132,20 @@ def scale(x):
 def add_polynoms(x):
     #import pdb; pdb.set_trace()
     old_x = x.copy()
-    for i in range(2, 6):
+    for i in range(2, 5):
         x = np.append(x, old_x**i, axis=1)
     return x
+
+def predict(test, theta, mu, s):
+    test = np.array(test)
+    old_test = test
+    for i in range(2, 5):
+        test = np.append(test, old_test**i)
+    test = test - mu
+    test = test / s
+    test = np.insert(test, 0, 1)
+    prediction = theta.dot(test)
+    return prediction
 
 
 def fit_params(x, y):
@@ -139,15 +153,16 @@ def fit_params(x, y):
     """
     x, y = np.array(x), np.array(y)
     # add polymonial features
+    x = add_polynoms(x)
     # feature scaling
     x, mu, s = scale(x)
-    #x = add_polynoms(x)
     # first: randomize order
     len_x, len_y = x.shape[0], y.shape[0]
+    x, y = randomize(x, y, len_x)
+    # insert ones
     x = np.insert(x, 0, 1, axis=1)
     if len_x != len_y:
         raise ValueError("Error: features x and response y have different lengths")
-    x, y = randomize(x, y, len_x)
     # second: separate into training, cv, and test set
     div1, div2 = math.floor(len_x * 0.6), math.floor(len_x * 0.8)
     train_x, train_y = x[:div1], y[:div1]
@@ -155,6 +170,10 @@ def fit_params(x, y):
     test_x, test_y = x[div2:], y[div2:]
     learning_curve(train_x, train_y, cv_x, cv_y)
     theta = train_parameters(train_x, train_y, cv_x, cv_y)
+    test = [150, 40000, 1000]
+    print("I predict a 3 year old Golf with 150 PS and 40k kilometers on the clock to cost ~", predict(test, theta, mu, s))
+    print("theta:", theta)
+    return None
 
 
 def test_descent():
@@ -193,7 +212,7 @@ def test_cost_grad():
     # assert np.sum(error_train[-3:] - np.array([23.261462, 24.317250, 22.373907])) < 0.00001
     # assert np.sum(error_val[-3:] - np.array([28.935174, 29.551049, 29.433177])) < 0.0001
     # now: with polynomial features:
-    
+
 
 # test stuff here
 test_cost_grad()
