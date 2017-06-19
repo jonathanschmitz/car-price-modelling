@@ -132,15 +132,17 @@ def scale(x):
 def add_polynoms(x):
     #import pdb; pdb.set_trace()
     old_x = x.copy()
-    for i in range(2, 5):
+    for i in range(2, 8):
         x = np.append(x, old_x**i, axis=1)
+    x = np.append(x, 1/old_x, axis=1)
     return x
 
 def predict(test, theta, mu, s):
     test = np.array(test)
     old_test = test
-    for i in range(2, 5):
+    for i in range(2, 8):
         test = np.append(test, old_test**i)
+    test = np.append(test, 1/old_test )
     test = test - mu
     test = test / s
     test = np.insert(test, 0, 1)
@@ -170,10 +172,28 @@ def fit_params(x, y):
     test_x, test_y = x[div2:], y[div2:]
     learning_curve(train_x, train_y, cv_x, cv_y)
     theta = train_parameters(train_x, train_y, cv_x, cv_y)
+    test = [150, 10000, 350]
+    print("I predict a 1 year old Golf with 150 PS and 10k kilometers on the clock to cost ~", predict(test, theta, mu, s))
     test = [150, 40000, 1000]
     print("I predict a 3 year old Golf with 150 PS and 40k kilometers on the clock to cost ~", predict(test, theta, mu, s))
+    depreciation_curve(theta, mu, s)
     print("theta:", theta)
     return None
+
+
+def depreciation_curve(theta, mu, s):
+    x = []
+    y = []
+    for i in range(3, 10 * 4 + 1):
+        days = 91 * i
+        x.append(days)
+        test = [150, 2500 * i, days]
+        prediction = predict(test, theta, mu, s)
+        y.append(prediction)
+    plt.figure()
+    plt.plot(x, y )
+    plt.legend(("train", "cv"))
+
 
 
 def test_descent():
