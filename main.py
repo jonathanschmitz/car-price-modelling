@@ -132,17 +132,19 @@ def scale(x):
 def add_polynoms(x):
     #import pdb; pdb.set_trace()
     old_x = x.copy()
-    for i in range(2, 8):
+    for i in range(2, 6):
         x = np.append(x, old_x**i, axis=1)
-    x = np.append(x, 1/old_x, axis=1)
+    for i in range(1, 4):
+        x = np.append(x, 1/(old_x**i), axis=1)
     return x
 
 def predict(test, theta, mu, s):
     test = np.array(test)
     old_test = test
-    for i in range(2, 8):
+    for i in range(2, 6):
         test = np.append(test, old_test**i)
-    test = np.append(test, 1/old_test )
+    for i in range(1, 4):
+        test = np.append(test, 1/(old_test**i))
     test = test - mu
     test = test / s
     test = np.insert(test, 0, 1)
@@ -184,7 +186,7 @@ def fit_params(x, y):
 def depreciation_curve(theta, mu, s):
     x = []
     y = []
-    for i in range(3, 10 * 4 + 1):
+    for i in range(3, 20 * 4 + 1):
         days = 91 * i
         x.append(days)
         test = [150, 2500 * i, days]
